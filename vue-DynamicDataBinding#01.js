@@ -26,6 +26,8 @@ p.walk = function(obj){
 
 
 // ES6 Syntax
+Observer.prototype.data = {};
+
 class Observer{
    constructor(obj){
    	 //console.log("Observering..")
@@ -43,8 +45,6 @@ class Observer{
 	})
    }
 }
-
-Observer.prototype.data = {};
 
 /* Test Case */
 var person1 = new Observer({name:"xiaoming", age:20, address:{add1:"China",add2:"UK"} });
