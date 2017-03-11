@@ -3,87 +3,76 @@
  *http://ife.baidu.com/course/detail/id/20
  *Run environment : Browser
 */
-
 function Observer(obj){
-   this.walk(obj)
+  this.data = obj;
+  this.walk(obj);
 }
 
-var p = Observer.prototype
-p.data = {}
-
-p.walk = function(obj){
-    Object.keys(obj).forEach(function(key){
-    if(typeof obj[key] === "object"){p.walk(obj[key])}
-    console.log(key);
-    Object.defineProperty(p.data,key,{
-        get:function(){ 
-          console.log("You are visiting the attribute: "+ key+" - "+ obj[key]); 
-          return obj[key]  },
-        set:function(newValue) { 
-          console.log("You are updating the attribute: "+ key +" - "+ newValue); 
-          obj[key] = newValue }
-        })
-	})
-}
-
-
-/* Test Case */
-var person1 = new Observer({name:"xiaoming", age:20, address:{add1:"China",add2:"UK"} });
-person1.data.add1
-
-//=============================================================================================
-/*
-function Observer (data) {
-  //暂不考虑数组
-  this.data = data;
-  this.makeObserver(data);
-}
-Observer.prototype.setterAndGetter = function (key, val) {
-  //此为问题一的要点
-  Object.defineProperty(this.data, key, {
-    enumerable: true,
-    configurable: true,
-    get: function(){
-      console.log('你访问了' + key);
-      return val;
-    },
-    set: function(newVal){
-      console.log('你设置了' + key);
-      console.log('新的' + key + '=' + newVal);
-      val = newVal;
+Observer.prototype.walk = function(obj) {
+  Object.keys(obj).forEach(key => {
+    let val = obj[key]
+    console.log(key)
+    if(typeof obj[key] === "object"){
+      new Observer(obj[key])
     }
-  })
-}
-Observer.prototype.makeObserver = function (obj) {
-  let val;
-  //此为问题二的要点
-  for(let key in obj){
-    if(obj.hasOwnProperty(key)){
-      val = obj[key];
-      //深度遍历
-      if(typeof val === 'object'){
-        new Observer(val);
+
+    Object.defineProperty(this.data,key,{
+     enumerable: true,
+     configurable: true,
+     get:function(){ 
+       console.log("You are visiting the attribute: "+ key +" - " + val)
+       return val },
+     set:function(newValue) { 
+       console.log("You are updating the attribute: "+ key +" - "+ newValue)
+       Observer.prototype.$change.call(this,key,newValue)  //Event Trigger 
+       val = newValue
       }
-    }
-    this.setterAndGetter(key, val);
-  }
+  })
+ })
 }
 
-//测试
-let app = new Observer({
-basicInfo: {
-    name: 'liujianhuan',
-    age: 25
-},
-company: 'Qihoo 360',
-address: 'Chaoyang, Beijing'
+Observer.prototype.oberseredList = {}  //subscriber list,shared property with oberser&publisher
+let oberseredList = Observer.prototype.oberseredList
+
+Observer.prototype.$watch = (oberseredKey,cb) =>{    //subscriber register
+  if(!oberseredList.hasOwnProperty(oberseredKey)){
+    oberseredList[oberseredKey] = []
+  }
+  oberseredList[oberseredKey].push(cb)
+}
+
+Observer.prototype.$change = function(oberseredKey,newValue){  //Event Trigger
+  let params = Array.prototype.slice.call(arguments,1)
+  if(oberseredList.hasOwnProperty(oberseredKey)) { 
+     oberseredList[oberseredKey].forEach(cb => {
+      cb.apply(null,params)
+     })
+  }
+  
+}
 
 
+/*Test Case*/
+var person1 = new Observer({name:"xiaoming", age:20, address:{add1:"China",add2:"UK"} });
+person1.data.age
+person1.$watch('age', function(age) {
+         console.log(`我的年纪变了，现在已经是：${age}岁了`)
+ });
+person1.data.age = 55
+person1.data
 
+/*ERROR: Uncaught RangeError: Maximum call stack size exceeded
+*
+*You cannot access a property in the getters or setters by the same name 
+*as a property you are defining using Object.defineProperty. 
+*You've created a recursive function call that never exits.
+*
+*/
 
-
-
-
-
-
+/*ERROR: "arguments is not defined" 
+*
+* An arrow function expression has a shorter syntax than a function expression 
+*and does not bind its own this, arguments, super, or new.target. 
+*These function expressions are best suited for non-method functions, 
+*and they cannot be used as constructors.
 */
