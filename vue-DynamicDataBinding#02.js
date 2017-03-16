@@ -11,7 +11,6 @@ function Observer(obj){
 Observer.prototype.walk = function(obj) {
   Object.keys(obj).forEach(key => {
     let val = obj[key]
-    console.log(key)
     if(typeof obj[key] === "object"){
       new Observer(obj[key])
     }
@@ -22,7 +21,10 @@ Observer.prototype.walk = function(obj) {
      get:function(){ 
        console.log("You are visiting the attribute: "+ key +" - " + val)
        return val },
-     set:function(newValue) { 
+     set:function(newValue) {
+       if(typeof newValue === 'object'){
+       new Observer(newValue)
+       } 
        console.log("You are updating the attribute: "+ key +" - "+ newValue)
        Observer.prototype.$change.call(this,key,newValue)  //Event Trigger 
        val = newValue
@@ -41,7 +43,7 @@ Observer.prototype.$watch = (oberseredKey,cb) =>{    //subscriber register
   oberseredList[oberseredKey].push(cb)
 }
 
-Observer.prototype.$change = function(oberseredKey,newValue){  //Event Trigger
+Observer.prototype.$change = function(oberseredKey){  //Event Trigger
   let params = Array.prototype.slice.call(arguments,1)
   if(oberseredList.hasOwnProperty(oberseredKey)) { 
      oberseredList[oberseredKey].forEach(cb => {
