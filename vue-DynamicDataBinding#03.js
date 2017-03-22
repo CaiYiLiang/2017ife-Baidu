@@ -29,7 +29,6 @@ Observer.prototype.walk = function(obj) {
        return val },
      set:function(newValue) {  
        // refresh the ParentNodeList  
-       // Object.keys(parentNodeList).forEach(listKey => 
        for(let listKey in parentNodeList) {
          if(parentNodeList[listKey]===key){
           delete parentNodeList[listKey]
@@ -38,7 +37,6 @@ Observer.prototype.walk = function(obj) {
 
        if(typeof newValue === 'object'){
        let newObj = newValue
-       // Object.keys(newObj).forEach(newObjKey => {
        for(let newObjKey in newObj) {
          parentNodeList[newObjKey] = key
        }
@@ -81,11 +79,9 @@ Observer.prototype.$change = function(oberseredKey){  //Event Trigger
 Observer.prototype.getParentNodeList = function() {
    let parentNodeList = {}
 
-   // Object.keys(this.data).forEach( key => { 
    for(let key in this.data) {
     if(typeof this.data[key] === "object"){
       let parentNodeKey = key
-      // Object.keys(this.data[key]).forEach( key => {
       for(let childKey in this.data[key]){
         parentNodeList[childKey] = parentNodeKey
       }
