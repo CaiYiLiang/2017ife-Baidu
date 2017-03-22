@@ -5,12 +5,14 @@
 */
 function Observer(obj){
   this.data = obj
-  this.ParentNodeList = this.getParentNodeList();
+  this.oberseredList = {}
+  this.ParentNodeList = this.getParentNodeList()
   this.walk(obj)
 }
 
 Observer.prototype.walk = function(obj) {
-
+  
+  let oberseredList = this.oberseredList
   let parentNodeList = this.ParentNodeList
   Object.keys(obj).forEach(key => {
     let val = obj[key]
@@ -24,7 +26,8 @@ Observer.prototype.walk = function(obj) {
      get:function(){ 
        console.log("You are visiting the attribute: "+ key +" - " + val)
        return val },
-     set:function(newValue) {       
+     set:function(newValue) {  
+       // refresh the ParentNodeList     
        Object.keys(parentNodeList).forEach(function(listKey){
          if(parentNodeList[listKey]===key){
           delete parentNodeList[listKey]
@@ -32,7 +35,6 @@ Observer.prototype.walk = function(obj) {
        })
 
        if(typeof newValue === 'object'){
-       // refresh the ParentNodeList
        let newObj = newValue
        Object.keys(newObj).forEach(function(newObjKey){
          parentNodeList[newObjKey] = key
@@ -41,10 +43,11 @@ Observer.prototype.walk = function(obj) {
        console.log("set中的this")
        console.log(this)
        this.ParentNodeList = parentNodeList
-
        Observer.prototype.walk.call(this,newValue)
        } 
+
        console.log("You are updating the attribute: "+ key +" - "+ newValue)
+       this.oberseredList = oberseredList
        Observer.prototype.$change.call(this,key,newValue)  //Event Trigger 
        
        if(parentNodeList.hasOwnProperty(key)){
@@ -57,21 +60,17 @@ Observer.prototype.walk = function(obj) {
  })
 }
 
-Observer.prototype.oberseredList = {}  //subscriber list,shared property with oberser&publisher
-let oberseredList = Observer.prototype.oberseredList
-
-
 Observer.prototype.$watch = function(oberseredKey,cb) {    //subscriber register
-  if(!oberseredList.hasOwnProperty(oberseredKey)){
-   oberseredList[oberseredKey] = []
+  if(!this.oberseredList.hasOwnProperty(oberseredKey)){
+   this.oberseredList[oberseredKey] = []
   }
-  oberseredList[oberseredKey].push(cb)
+  this.oberseredList[oberseredKey].push(cb)
 }
 
 Observer.prototype.$change = function(oberseredKey){  //Event Trigger
   let params = Array.prototype.slice.call(arguments,1)
-  if(oberseredList.hasOwnProperty(oberseredKey)) { 
-     oberseredList[oberseredKey].forEach(cb => {
+  if(this.oberseredList.hasOwnProperty(oberseredKey)) { 
+     this.oberseredList[oberseredKey].forEach(cb => {
       cb.apply(null,params)
      })
   }
