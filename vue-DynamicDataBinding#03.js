@@ -23,12 +23,12 @@ Observer.prototype.walk = function(obj) {
     Object.defineProperty(obj,key,{
      enumerable: true,
      configurable: true,
-     get:function(){ 
+     get:() => { 
        console.log("You are visiting the attribute: "+ key +" - " + val)
        return val },
      set:function(newValue) {  
        // refresh the ParentNodeList     
-       Object.keys(parentNodeList).forEach(function(listKey){
+       Object.keys(parentNodeList).forEach(listKey => {
          if(parentNodeList[listKey]===key){
           delete parentNodeList[listKey]
          }
@@ -36,7 +36,7 @@ Observer.prototype.walk = function(obj) {
 
        if(typeof newValue === 'object'){
        let newObj = newValue
-       Object.keys(newObj).forEach(function(newObjKey){
+       Object.keys(newObj).forEach(newObjKey => {
          parentNodeList[newObjKey] = key
        })
        
@@ -105,4 +105,3 @@ person1.$watch('name', function (newName) {
 person1.data.name.firstName = 'hahaha';
 
 person1.data.name = { newName: "lady" , oldName: "beautiful"}
-
