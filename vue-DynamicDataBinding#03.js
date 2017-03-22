@@ -11,7 +11,6 @@ function Observer(obj){
 
 Observer.prototype.walk = function(obj) {
 
-  // console.log(this.ParentNodeList)
   let parentNodeList = this.ParentNodeList
   Object.keys(obj).forEach(key => {
     let val = obj[key]
@@ -25,22 +24,24 @@ Observer.prototype.walk = function(obj) {
      get:function(){ 
        console.log("You are visiting the attribute: "+ key +" - " + val)
        return val },
-     set:function(newValue) {
-       if(typeof newValue === 'object'){
-       // refresh the ParentNodeList
-       let newObj = newValue
+     set:function(newValue) {       
        Object.keys(parentNodeList).forEach(function(listKey){
          if(parentNodeList[listKey]===key){
           delete parentNodeList[listKey]
          }
        })
 
+       if(typeof newValue === 'object'){
+       // refresh the ParentNodeList
+       let newObj = newValue
        Object.keys(newObj).forEach(function(newObjKey){
          parentNodeList[newObjKey] = key
        })
-
-       this.ParentNodeList = parentNodeList
        
+       console.log("set中的this")
+       console.log(this)
+       this.ParentNodeList = parentNodeList
+
        Observer.prototype.walk.call(this,newValue)
        } 
        console.log("You are updating the attribute: "+ key +" - "+ newValue)
@@ -92,7 +93,6 @@ Observer.prototype.getParentNodeList = function() {
 
   return parentNodeList
 } 
-
 
 /*Test Case*/
 var person1 = new Observer({name: { firstName: 'shaofeng', lastName: 'liang'}, age:20, address:{add1:"China",add2:"UK"} });
