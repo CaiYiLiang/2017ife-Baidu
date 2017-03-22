@@ -40,8 +40,6 @@ Observer.prototype.walk = function(obj) {
          parentNodeList[newObjKey] = key
        })
        
-       console.log("set中的this")
-       console.log(this)
        this.ParentNodeList = parentNodeList
        Observer.prototype.walk.call(this,newValue)
        } 
