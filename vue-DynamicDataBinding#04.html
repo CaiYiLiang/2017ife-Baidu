@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+	<title>vue-DynamicDataBinding#04</title>
+	<meta name="description" content="http://ife.baidu.com/course/detail/id/22?t=1491100787613#learn">
+    <meta name="keywords" content="Baidu IFE2017,JavaScript,Vue">
+    <meta name="author" content="https://github.com/CaiYiLiang"> 
+</head>
+<body>
+    <div id="app">
+    <p>姓名：{{user.name}}</p>
+    <p>年龄：{{user.age}}</p>
+    </div>
+
+<script>
+	let app = new Vue({
+           el: '#app',
+           data: {
+	         user: {
+	         name: 'youngwind',
+	         age: 25
+	       }
+	   }
+    });
+
+    function Vue(obj){
+    	this.data = obj.data
+    	this.convertedHtml = ""
+    	if(!obj.el.startsWith("#")){ return }
+    	let html = document.getElementById(obj.el.slice(1)).innerHTML
+    	let rule = /\{\{\s*([a-zA-Z\.\_\$0-9()]+)\s*\}\}/m
+    	let match = [] // empty arrary
+ 
+    	while (match = rule.exec(html)) {
+           if( match.index > 0 ){
+           	this.convertedHtml += html.slice(0,match.index)
+           }
+
+           let param = this.data
+           let paramTmp = match[1].split(".")
+           paramTmp.forEach(el => { param = param[el] })
+           this.convertedHtml += param
+           html = html.slice(match.index + match[0].length)
+    	}
+    	if(html){
+    		this.convertedHtml += html
+    	}
+
+        document.getElementById(obj.el.slice(1)).innerHTML = this.convertedHtml
+    }
+</script>
+
+
+</body>
+</html>
