@@ -13,8 +13,43 @@
     <p>Age ：{{user.age}}</p>
     </div>
 
+
 <script>
-	let app = new Vue({
+    class Vue {
+      constructor(obj) {
+        this.obj = obj
+        this.$render(obj)
+        window.Vue = Vue
+      }
+
+      $render(obj){
+        if(!obj.el.startsWith("#") || !obj.el){ return }
+
+        let convertedHtml = ""
+        let html = document.getElementById(obj.el.slice(1)).innerHTML
+        let rule = /\{\{\s*([a-zA-Z\.\_\$0-9()]+)\s*\}\}/m
+        let match = [] // empty arrary
+
+        while (match = rule.exec(html)) {
+           if( match.index > 0 ){
+             convertedHtml += html.slice(0,match.index)
+           }
+
+           let param = obj.data
+           let paramTmp = match[1].split(".")
+           paramTmp.forEach(el => { param = param[el] })
+           convertedHtml += param
+           html = html.slice(match.index + match[0].length)
+          }
+          if(html){
+               convertedHtml += html
+          }
+
+        document.getElementById(obj.el.slice(1)).innerHTML = convertedHtml
+      }
+    }
+	
+    let app = new Vue({
            el: '#app',
            data: {
 	         user: {
@@ -24,33 +59,37 @@
 	   }
     });
 
-    function Vue(obj){
-    	this.data = obj.data
-    	this.convertedHtml = ""
-    	if(!obj.el.startsWith("#")){ return }
-    	let html = document.getElementById(obj.el.slice(1)).innerHTML
-    	let rule = /\{\{\s*([a-zA-Z\.\_\$0-9()]+)\s*\}\}/m
-    	let match = [] // empty arrary
- 
-    	while (match = rule.exec(html)) {
-           if( match.index > 0 ){
-           	this.convertedHtml += html.slice(0,match.index)
-           }
-
-           let param = this.data
-           let paramTmp = match[1].split(".")
-           paramTmp.forEach(el => { param = param[el] })
-           this.convertedHtml += param
-           html = html.slice(match.index + match[0].length)
-    	}
-    	if(html){
-    		this.convertedHtml += html
-    	}
-
-        document.getElementById(obj.el.slice(1)).innerHTML = this.convertedHtml
-    }
 </script>
-
-
 </body>
 </html>
+
+<!--
+    // method 01 - function declare
+    // <script>
+    // function Vue(obj){
+    //  this.data = obj.data
+    //  this.convertedHtml = ""
+    //  if(!obj.el.startsWith("#")){ return }
+    //  let html = document.getElementById(obj.el.slice(1)).innerHTML
+    //  let rule = /\{\{\s*([a-zA-Z\.\_\$0-9()]+)\s*\}\}/m
+    //  let match = [] // empty arrary
+ 
+    //  while (match = rule.exec(html)) {
+    //        if( match.index > 0 ){
+    //          this.convertedHtml += html.slice(0,match.index)
+    //        }
+
+    //        let param = this.data
+    //        let paramTmp = match[1].split(".")
+    //        paramTmp.forEach(el => { param = param[el] })
+    //        this.convertedHtml += param
+    //        html = html.slice(match.index + match[0].length)
+    //  }
+    //  if(html){
+    //      this.convertedHtml += html
+    //  }
+
+    //     document.getElementById(obj.el.slice(1)).innerHTML = this.convertedHtml
+    // }
+    // </script>
+-->
