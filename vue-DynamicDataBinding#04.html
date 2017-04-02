@@ -2,8 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-	<title>vue-DynamicDataBinding#04</title>
-	<meta name="description" content="http://ife.baidu.com/course/detail/id/22?t=1491100787613#learn">
+    <title>vue-DynamicDataBinding#04</title>
+    <meta name="description" content="http://ife.baidu.com/course/detail/id/22?t=1491100787613#learn">
     <meta name="keywords" content="Baidu IFE2017,JavaScript,Vue">
     <meta name="author" content="https://github.com/CaiYiLiang"> 
 </head>
@@ -15,11 +15,11 @@
 
 
 <script>
-    class Vue {
+  class Vue {
       constructor(obj) {
-        this.obj = obj
-        this.$render(obj)
-        window.Vue = Vue
+      this.obj = obj
+      this.$render(obj)
+      window.Vue = Vue
       }
 
       $render(obj){
@@ -49,15 +49,15 @@
       }
     }
 	
-    let app = new Vue({
-           el: '#app',
-           data: {
-	         user: {
-	         name: 'youngwind',
-	         age: 25
-	       }
+  let app = new Vue({
+        el: '#app',
+        data: {
+	       user: {
+	       name: 'youngwind',
+	       age: 25
+	    }
 	   }
-    });
+  });
 
 </script>
 </body>
