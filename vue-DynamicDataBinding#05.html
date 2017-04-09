@@ -1,0 +1,178 @@
+   <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>vue-DynamicDataBinding#05</title>
+    <meta name="description" content="http://ife.baidu.com/course/detail/id/24">
+    <meta name="keywords" content="Baidu IFE2017,JavaScript,Vue">
+    <meta name="author" content="https://github.com/CaiYiLiang"> 
+</head>
+<body>
+    <div id="app">
+    <p>Name：{{user.name}}</p>
+    <p>Age ：{{user.age}}</p>
+    <p>Year：{{year}}</p>
+    </div>
+
+
+<script>
+  class Vue {
+      constructor(obj) {
+       this.option = obj
+       this.$data = obj.data
+       this.$el = obj.el
+       this.oberseredList = {}
+       this.ParentNodeList = this.getParentNodeList()
+       this.directive = {}
+       this.tempalte = []
+       this.walk(obj.data)
+       this.$render(obj)
+
+       this.$watch('set',this.renderTree)
+       window.Vue = Vue
+      }
+
+      walk(data){
+        let ob = this
+        let oberseredList = this.oberseredList
+        let parentNodeList = this.ParentNodeList
+        let tempalte = this.tempalte
+        let directive = this.directive
+        for(let key in data){
+         let val = data[key]
+         if(typeof data[key] === "object"){
+         this.walk(data[key])
+         }
+
+        Object.defineProperty(data,key,{
+         enumerable: true,
+         configurable: true,
+         get:() => { 
+          console.log("You are visiting the attribute: "+ key +" - " + val)
+          return val },
+         set:function(newValue) { 
+          if(val===newValue) {return }
+          // refresh the ParentNodeList  
+          for(let listKey in parentNodeList) {
+           if(parentNodeList[listKey]===key){
+           delete parentNodeList[listKey]
+           }
+          }
+
+        if(typeof newValue === 'object'){
+         let newObj = newValue
+         for(let newObjKey in newObj) {
+          parentNodeList[newObjKey] = key
+        }
+       
+         this.ParentNodeList = parentNodeList
+         Vue.prototype.walk.call(this,newValue)
+        } 
+
+         console.log("You are updating the attribute: "+ key +" - "+ newValue)
+         this.oberseredList = oberseredList
+         Vue.prototype.$change.call(this,key,newValue)  //Event Trigger 
+       
+       if(parentNodeList.hasOwnProperty(key)){
+         Vue.prototype.$change.call(this,parentNodeList[key])
+         if(directive[key].parent === parentNodeList[key] ){
+          tempalte[directive[key].index]=newValue
+          Vue.prototype.$change.call(ob,'set')  
+         }
+       }
+       else
+        if(tempalte[directive[key].index]){
+         tempalte[directive[key].index]=newValue
+         Vue.prototype.$change.call(ob,'set')  
+       }
+
+       val = newValue
+      }
+     })
+    }
+    }
+
+    $watch(oberseredKey,cb) {    //subscriber register
+     if(!this.oberseredList.hasOwnProperty(oberseredKey)){
+      this.oberseredList[oberseredKey] = []
+      }
+     this.oberseredList[oberseredKey].push(cb)
+    }
+
+    $change(oberseredKey) {  //Event Trigger
+     let params = Array.prototype.slice.call(arguments,1)
+     if(this.oberseredList.hasOwnProperty(oberseredKey)) { 
+      this.oberseredList[oberseredKey].forEach(cb => {
+      console.log(this)
+      cb.apply(this,params)
+     })
+     }
+    }
+
+    getParentNodeList() {
+     let parentNodeList = {}
+     for(let key in this.$data) {
+       if(typeof this.$data[key] === "object"){
+        let parentNodeKey = key
+        for(let childKey in this.$data[key]){
+         parentNodeList[childKey] = parentNodeKey
+        }
+       }
+     } 
+   return parentNodeList
+   } 
+
+      $render(obj){
+        if(!obj.el.startsWith("#") || !obj.el){ return }
+        let html = document.getElementById(obj.el.slice(1)).innerHTML
+        let rule = /\{\{\s*([a-zA-Z\.\_\$0-9()]+)\s*\}\}/m
+        let match = [] // empty arrary
+
+        while (match = rule.exec(html)) {
+           if( match.index > 0 ){   
+             this.tempalte.push(html.slice(0,match.index))
+           }
+
+           let param = obj.data
+           let paramTmp = match[1].split(".")
+           paramTmp.forEach(el => { param = param[el] })
+           this.tempalte.push(param)
+           this.directives(paramTmp,param,this.tempalte.length-1)
+           html = html.slice(match.index + match[0].length)
+          }
+
+       if(html){
+          this.tempalte.push(html)}
+
+       Vue.prototype.renderTree.call(this) 
+      }
+
+     directives(keys,value,index){  
+       if(this.ParentNodeList.hasOwnProperty(keys[keys.length-1])){
+          this.directive[keys[keys.length-1]] = 
+          { index, parent: this.ParentNodeList[keys[keys.length-1]] } 
+          return 
+         }
+         this.directive[keys[keys.length-1]] = { index, parent:null } 
+     }
+
+     renderTree(){
+       document.getElementById(this.$el.slice(1)).innerHTML = this.tempalte.join("")
+     }
+}
+	
+  let app = new Vue({
+        el: '#app',
+        data: {
+         year: 2017,
+	       user: {
+	       name: 'youngwind',
+	       age: 25
+	       },
+         address:{add1:{adds:"Panyu",adds2:"Shiqiao"}}
+	   }
+  });
+
+</script>
+</body>
+</html>
