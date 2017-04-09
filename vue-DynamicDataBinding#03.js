@@ -14,7 +14,6 @@ Observer.prototype.walk = function(obj) {
   
   let oberseredList = this.oberseredList
   let parentNodeList = this.ParentNodeList
-  // Object.keys(obj).forEach(key => 
   for(let key in obj){
     let val = obj[key]
     if(typeof obj[key] === "object"){
