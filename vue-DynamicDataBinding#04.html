@@ -25,27 +25,27 @@
       $render(obj){
         if(!obj.el.startsWith("#") || !obj.el){ return }
 
-        let convertedHtml = ""
+        let convertedHtml = []
         let html = document.getElementById(obj.el.slice(1)).innerHTML
         let rule = /\{\{\s*([a-zA-Z\.\_\$0-9()]+)\s*\}\}/m
         let match = [] // empty arrary
 
         while (match = rule.exec(html)) {
            if( match.index > 0 ){
-             convertedHtml += html.slice(0,match.index)
+             convertedHtml.push(html.slice(0,match.index))
            }
 
            let param = obj.data
            let paramTmp = match[1].split(".")
            paramTmp.forEach(el => { param = param[el] })
-           convertedHtml += param
+           convertedHtml.push(param)
            html = html.slice(match.index + match[0].length)
           }
           if(html){
-               convertedHtml += html
+               convertedHtml.push(html)
           }
 
-        document.getElementById(obj.el.slice(1)).innerHTML = convertedHtml
+        document.getElementById(obj.el.slice(1)).innerHTML = convertedHtml.join("")
       }
     }
 	
